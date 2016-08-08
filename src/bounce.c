@@ -20,8 +20,8 @@ static int position_x, position_y;
 static int x_velocity, y_velocity;
 static int ball_radius = 20;
 
-// The select button starts the ball rolling (so to speak)
-static void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
+// Double-clicking the select button starts the ball rolling (so to speak)
+static void select_double_click_handler(ClickRecognizerRef recognizer, void *context) {
     position_x = 72;
     position_y = 25;
     x_velocity = y_velocity = 6;
@@ -97,13 +97,15 @@ static void timer_callback(void *data) {
 }
 
 static void click_config_provider(void *context) {
-  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, up_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_single_click_handler);
 
   // 18.1.1: break speed change out onto long buttons (no up handler, just down)
   window_long_click_subscribe(BUTTON_ID_UP, 0, up_long_click_handler, NULL);
   window_long_click_subscribe(BUTTON_ID_DOWN, 0, down_long_click_handler, NULL);
+
+  // 18.1.2: restart ball on double click only
+  window_multi_click_subscribe(BUTTON_ID_SELECT, 2, 0, 0, true, select_double_click_handler);
 }
 
 static void window_load(Window *window) {
