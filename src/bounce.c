@@ -20,6 +20,13 @@ static int position_x, position_y;
 static int x_velocity, y_velocity;
 static int ball_radius = 20;
 
+// actual *types* differ between platforms!
+#ifdef PBL_COLOR
+  static GColor8 ball_color;
+#else
+  static GColor ball_color;
+#endif
+
 // Double-clicking the select button starts the ball rolling (so to speak)
 static void select_double_click_handler(ClickRecognizerRef recognizer, void *context) {
     position_x = 72;
@@ -61,6 +68,17 @@ static void down_long_click_handler(ClickRecognizerRef recognizer, void *context
     APP_LOG(APP_LOG_LEVEL_DEBUG, "y_velocity: %d", y_velocity);
 }
 
+// The select button changes the ball color (if supported)
+static void select_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+#ifdef PBL_COLOR
+    if (gcolor_equal(ball_color, GColorCobaltBlue)) {
+        ball_color = GColorRed;
+    } else {
+        ball_color = GColorCobaltBlue;
+    }
+#endif
+}
+
 
 // This function moves the ball every time the timer goes off
 static void bounce_the_ball() {
@@ -81,12 +99,8 @@ static void bounce_the_ball() {
 static void bouncy_layer_update_callback(Layer *me, GContext *ctx) { 
     if (position_x == -1) return;
     
-#ifdef PBL_COLOR
-  graphics_context_set_fill_color(ctx, GColorCobaltBlue);
-#else
-  graphics_context_set_fill_color(ctx, GColorWhite);
-#endif
-  graphics_fill_circle(ctx, GPoint(position_x, position_y), ball_radius);
+    graphics_context_set_fill_color(ctx, ball_color);
+    graphics_fill_circle(ctx, GPoint(position_x, position_y), ball_radius);
 }
 
 static void timer_callback(void *data) {
@@ -106,6 +120,9 @@ static void click_config_provider(void *context) {
 
   // 18.1.2: restart ball on double click only
   window_multi_click_subscribe(BUTTON_ID_SELECT, 2, 0, 0, true, select_double_click_handler);
+
+  // 18.1.3: long click select to change the color of the ball
+  window_long_click_subscribe(BUTTON_ID_SELECT, 2000, select_long_click_handler, NULL);
 }
 
 static void window_load(Window *window) {
@@ -122,6 +139,8 @@ static void window_unload(Window *window) {
 }
 
 static void init(void) {
+  ball_color = COLOR_FALLBACK(GColorCobaltBlue, GColorWhite);
+
   window = window_create();
   window_set_click_config_provider(window, click_config_provider);
   window_set_window_handlers(window, (WindowHandlers) {
