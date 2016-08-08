@@ -1,7 +1,9 @@
 //----------------------------------------------------------------------------------
 //
-// Project 3.1 from "Programming Pebble in C"
+// Project 18.1 from "Programming Pebble in C"
+// (based on Project 3.1)
 // 
+// ishotjr, August 2016
 // Mike Jipping, December 2015
 
 #include <pebble.h>
@@ -19,25 +21,41 @@ static int x_velocity, y_velocity;
 static int ball_radius = 20;
 
 // The select button starts the ball rolling (so to speak)
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void select_single_click_handler(ClickRecognizerRef recognizer, void *context) {
     position_x = 72;
     position_y = 25;
     x_velocity = y_velocity = 6;
 } 
 
-// The up button increases the ball size and speed.
-static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+// The up button increases the ball's size on single click.
+static void up_single_click_handler(ClickRecognizerRef recognizer, void *context) {
     ball_radius ++;
-    x_velocity ++;
-    y_velocity ++;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ball_radius: %d", ball_radius);
 }
 
-// The down button decreases the ball's size and speed
-static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+// The down button decreases the ball's size on single click.
+static void down_single_click_handler(ClickRecognizerRef recognizer, void *context) {
     ball_radius --;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "ball_radius: %d", ball_radius);
+}
+
+
+// The up button increases the ball's speed when held.
+static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
+    x_velocity ++;
+    y_velocity ++;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "x_velocity: %d", x_velocity);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "y_velocity: %d", y_velocity);
+}
+
+// The down button decreases the ball's speed when held.
+static void down_long_click_handler(ClickRecognizerRef recognizer, void *context) {
     x_velocity --;
     y_velocity --;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "x_velocity: %d", x_velocity);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "y_velocity: %d", y_velocity);
 }
+
 
 // This function moves the ball every time the timer goes off
 static void bounce_the_ball() {
@@ -74,9 +92,13 @@ static void timer_callback(void *data) {
 }
 
 static void click_config_provider(void *context) {
-  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
-  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
-  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_single_click_handler);
+  window_single_click_subscribe(BUTTON_ID_UP, up_single_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_single_click_handler);
+
+  // 18.1.1: break speed change out onto long buttons (no up handler, just down)
+  window_long_click_subscribe(BUTTON_ID_UP, 0, up_long_click_handler, NULL);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 0, down_long_click_handler, NULL);
 }
 
 static void window_load(Window *window) {
