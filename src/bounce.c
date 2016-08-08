@@ -42,16 +42,21 @@ static void down_single_click_handler(ClickRecognizerRef recognizer, void *conte
 
 // The up button increases the ball's speed when held.
 static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-    x_velocity ++;
-    y_velocity ++;
+    // consider sign in order to correctly increase
+    x_velocity < 0 ? x_velocity-- : x_velocity++;
+    y_velocity < 0 ? y_velocity-- : y_velocity++;
     APP_LOG(APP_LOG_LEVEL_DEBUG, "x_velocity: %d", x_velocity);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "y_velocity: %d", y_velocity);
 }
 
 // The down button decreases the ball's speed when held.
 static void down_long_click_handler(ClickRecognizerRef recognizer, void *context) {
-    x_velocity --;
-    y_velocity --;
+    // stop at 0
+    if (x_velocity != 0) {
+        // consider sign in order to correctly decrease
+        x_velocity < 0 ? x_velocity++ : x_velocity--;
+        y_velocity < 0 ? y_velocity++ : y_velocity--;
+    }
     APP_LOG(APP_LOG_LEVEL_DEBUG, "x_velocity: %d", x_velocity);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "y_velocity: %d", y_velocity);
 }
