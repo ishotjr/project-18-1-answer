@@ -4,13 +4,13 @@
         ""
     ],
     "companyName": "C Programming With Pebble OS",
-    "longName": "Project 3.1",
+    "longName": "Project 18.1",
     "projectType": "native",
     "resources": {
         "media": []
     },
     "sdkVersion": "3",
-    "shortName": "Project 3.1",
+    "shortName": "Project 18.1",
     "targetPlatforms": [
         "basalt",
         "chalk"
